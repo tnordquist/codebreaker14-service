@@ -9,11 +9,11 @@
     <version>2.5.6</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <groupId>com.example</groupId>
-  <artifactId>codebreaker</artifactId>
+  <groupId>edu.cnm.deepdive</groupId>
+  <artifactId>codebreaker14-service</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>codebreaker</name>
-  <description>codebreaker</description>
+  <name>codebreaker14-service</name>
+  <description>codebreaker cohort 14 version</description>
   <properties>
     <java.version>11</java.version>
   </properties>
