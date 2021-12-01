@@ -106,4 +106,10 @@ public class Game {
   public List<Guess> getGuesses() {
     return guesses;
   }
+
+  public boolean isSolve() {
+    return guesses
+            .stream()
+            .anyMatch((guess) -> guess.getExactMatches() == length);
+  }
 }
