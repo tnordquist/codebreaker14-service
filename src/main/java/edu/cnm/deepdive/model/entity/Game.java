@@ -1,6 +1,8 @@
 package edu.cnm.deepdive.model.entity;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 import javax.persistence.*;
 
@@ -10,7 +12,8 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Table(
         indexes = {
-                @Index(columnList = "poolSize")
+                @Index(columnList = "poolSize"),
+                @Index(columnList = "user_id, created")
         }
 )
 public class Game {
@@ -41,8 +44,12 @@ public class Game {
   @Column(nullable = false,updatable = false)
   private int length;
 
-  @Column(nullable = false, updatable = false, length = 20)
+  @Column(name = "game_text", nullable = false, updatable = false, length = 20)
   private String text;
+
+  @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @OrderBy("created ASC")
+  private final List<Guess> guesses = new LinkedList<>();
 
   public UUID getId() {
     return id;
@@ -94,5 +101,9 @@ public class Game {
 
   public void setText(String text) {
     this.text = text;
+  }
+
+  public List<Guess> getGuesses() {
+    return guesses;
   }
 }
