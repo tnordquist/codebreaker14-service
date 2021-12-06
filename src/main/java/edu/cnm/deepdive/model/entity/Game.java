@@ -107,7 +107,7 @@ public class Game {
     return guesses;
   }
 
-  public boolean isSolve() {
+  public boolean isSolved() {
     return guesses
             .stream()
             .anyMatch((guess) -> guess.getExactMatches() == length);
