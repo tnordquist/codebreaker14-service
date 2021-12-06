@@ -7,10 +7,8 @@ import edu.cnm.deepdive.model.entity.Guess;
 import edu.cnm.deepdive.model.entity.User;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import javax.persistence.criteria.CriteriaBuilder;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -57,15 +55,13 @@ public class GameService {
         return gameRepository.save(game);
     }
 
-    public Guess processGuess(UUID gameKey, Guess guess, User user) {
+    public Guess processGuess(UUID gameKey, Guess guess, User user)
+            throws IllegalArgumentException, IllegalStateException, NoSuchElementException {
         return gameRepository
                 .findByExternalKeyAndUser(gameKey, user)
                 .map((game) -> {
                     int[] guessCodePoints = preprocessGuess(guess, game);
-                    int[] codeCodePoints = game
-                            .getText()
-                            .codePoints()
-                            .toArray();
+                    int[] codeCodePoints = getCodePoints(game.getText());
                     computeMatches(guess, guessCodePoints, codeCodePoints);
                     guess.setGame(game);
                     return guessRepository.save(guess);
@@ -74,26 +70,43 @@ public class GameService {
     }
 
     private void computeMatches(Guess guess, int[] guessCodePoints, int[] codeCodePoints) {
-        // TODO Compute exact matches and near matches, and use setters of guess to set these values.
+        int exactMatches = 0;
+        Map<Integer, Integer> guessCodePointCounts = new HashMap<>();
+        Map<Integer, Integer> codeCodePointCounts = new HashMap<>();
+        for (int i = 0; i < guessCodePoints.length; i++) {
+            if (guessCodePoints[i] == codeCodePoints[i]) {
+                exactMatches++;
+            } else {
+                guessCodePointCounts.put(guessCodePoints[i],
+                        1 + guessCodePointCounts.getOrDefault(guessCodePoints[i], 0));
+                codeCodePointCounts.put(codeCodePoints[i],
+                        1 + codeCodePointCounts.getOrDefault(codeCodePoints[i], 0));
+            }
+            guess.setExactMatches(exactMatches);
+            int nearMatches = guessCodePointCounts
+                    .entrySet()
+                    .stream()
+                    .mapToInt((entry) ->
+                            Math.min(entry.getValue(), codeCodePointCounts.getOrDefault(entry.getKey(), 0)))
+                    .sum();
+            guess.setNearMatches(nearMatches);
+        }
     }
 
     private int[] preprocessGuess(Guess guess, Game game) {
         if (game.isSolved()) {
             throw new IllegalStateException("Game is already solved.");
         }
+        int[] guessCodePoints = getCodePoints(guess.getText());
+        if (guessCodePoints.length != game.getLength()) {
+            throw new IllegalArgumentException(String.format(
+                    "Guess must have the same length (%d) as the secret code.", game.getLength()));
+        }
         Set<Integer> poolCodePoints = game
                 .getPool()
                 .codePoints()
                 .boxed()
                 .collect(Collectors.toSet());
-        int[] guessCodePoints = guess
-                .getText()
-                .codePoints()
-                .toArray();
-        if (guessCodePoints.length != game.getLength()) {
-            throw new IllegalArgumentException(String.format(
-                    "Guess must have the same length (%d) as the secret code.", game.getLength()));
-        }
         if (IntStream
                 .of(guessCodePoints)
                 .anyMatch((codePoint) -> !poolCodePoints.contains(codePoint))) {
@@ -125,6 +138,12 @@ public class GameService {
                 .limit(length)
                 .toArray();
         return new String(code, 0, codePoints.length);
+    }
+
+    private int[] getCodePoints(String source) {
+        return source
+                .codePoints()
+                .toArray();
     }
 
 }
