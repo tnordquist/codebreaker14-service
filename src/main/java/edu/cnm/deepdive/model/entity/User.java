@@ -15,6 +15,10 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import org.hibernate.annotations.CreationTimestamp;
 
 @SuppressWarnings("JpaDataSourceORMInspection")
@@ -30,9 +34,11 @@ public class User {
   @Id
   @GeneratedValue
   @Column(name = "user_id", updatable = false, columnDefinition = "UUID")
+  @JsonIgnore
   private UUID id;
 
   @Column(updatable = false, nullable = false, columnDefinition = "UUID", unique = true)
+  @JsonProperty(value = "id", access = Access.READ_ONLY)
   private UUID externalKey = UUID.randomUUID();
 
   @CreationTimestamp
@@ -41,13 +47,15 @@ public class User {
   private Date created;
 
   @Column(nullable = false, updatable = false, unique = true, length = 30)
+  @JsonIgnore
   private String oauthKey;
 
   @Column(nullable = false, updatable = true, unique = true, length = 100)
   private String displayName;
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-  @OrderBy
+  @OrderBy("created DESC")
+  @JsonIgnore
   private final List<Game> games = new LinkedList<>();
 
   public UUID getId() {
