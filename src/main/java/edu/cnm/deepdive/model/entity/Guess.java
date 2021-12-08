@@ -1,8 +1,10 @@
 package edu.cnm.deepdive.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -17,6 +19,8 @@ import java.util.UUID;
                 @Index(columnList = "game_id, created")
         }
 )
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({"id", "created", "text", "exactMatches", "nearMatches", "solution"})
 public class Guess {
 
     @Id
@@ -26,7 +30,7 @@ public class Guess {
     private UUID id;
 
     @Column(nullable = false, updatable = false, unique = true)
-    @JsonIgnore
+    @JsonProperty(value = "id", access = Access.READ_ONLY)
     private UUID externalKey = UUID.randomUUID();
 
     @CreationTimestamp

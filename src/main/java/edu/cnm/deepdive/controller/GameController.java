@@ -37,7 +37,7 @@ public class GameController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Iterable<Game> get() {
+    public Iterable<Game> get(@RequestParam(required = false, defaultValue = "ALL") String status) {
         return userService
                 .getCurrentUser()
                 .getGames();

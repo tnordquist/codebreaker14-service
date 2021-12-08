@@ -77,8 +77,8 @@ public class GameService {
 
   public Optional<Guess> getGuess(UUID gameKey, UUID guessKey, User user) {
     return gameRepository
-            .findByExternalKeyAndUser(gameKey, user)
-            .flatMap((game) -> guessRepository.findByGameAndExternalKey(game, guessKey));
+        .findByExternalKeyAndUser(gameKey, user)
+        .flatMap((game) -> guessRepository.findByGameAndExternalKey(game, guessKey));
   }
 
   private void computeMatches(Guess guess, int[] guessCodePoints, int[] codeCodePoints) {
