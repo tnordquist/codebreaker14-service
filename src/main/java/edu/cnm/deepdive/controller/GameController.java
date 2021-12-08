@@ -4,6 +4,7 @@ import edu.cnm.deepdive.model.entity.Game;
 import edu.cnm.deepdive.service.GameService;
 import edu.cnm.deepdive.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +41,12 @@ public class GameController {
         return userService
                 .getCurrentUser()
                 .getGames();
+    }
+
+    @DeleteMapping("/{externalKey}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID externalKey) {
+        gameService.delete(externalKey, userService.getCurrentUser());
     }
 
 }
