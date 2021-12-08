@@ -5,10 +5,9 @@ import edu.cnm.deepdive.service.GameService;
 import edu.cnm.deepdive.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/games")
@@ -27,6 +26,20 @@ public class GameController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Game post(@RequestBody Game game) {
         return gameService.startGame(game, userService.getCurrentUser());
+    }
+
+    @GetMapping(value = "/{externalKey}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Game get(@PathVariable UUID externalKey) {
+        return gameService
+                .get(externalKey, userService.getCurrentUser())
+                .orElseThrow();
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public Iterable<Game> get() {
+        return userService
+                .getCurrentUser()
+                .getGames();
     }
 
 }

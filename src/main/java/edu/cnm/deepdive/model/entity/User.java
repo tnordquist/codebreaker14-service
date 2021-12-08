@@ -17,8 +17,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.hibernate.annotations.CreationTimestamp;
 
 @SuppressWarnings("JpaDataSourceORMInspection")
@@ -29,6 +32,8 @@ import org.hibernate.annotations.CreationTimestamp;
         @Index(columnList = "created")
     }
 )
+@JsonInclude(Include.NON_NULL)
+@JsonPropertyOrder({"id", "created", "displayName"})
 public class User {
 
   @Id
@@ -53,7 +58,7 @@ public class User {
   @Column(nullable = false, updatable = true, unique = true, length = 100)
   private String displayName;
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
   @OrderBy("created DESC")
   @JsonIgnore
   private final List<Game> games = new LinkedList<>();
